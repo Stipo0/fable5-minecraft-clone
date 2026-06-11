@@ -1,0 +1,117 @@
+# Blockcraft
+
+A Minecraft-style voxel sandbox that runs in the browser, built with **React**,
+**react-three-fiber** and **TypeScript**. Infinite-ish procedurally generated
+terrain, block breaking and placing, swimming, caves, trees — all rendered with
+chunked meshes and baked ambient occlusion. No image assets: every texture is
+drawn onto a canvas atlas at startup.
+
+## Features
+
+- **Procedural terrain** — layered simplex noise (rolling hills, ridged
+  mountains, beaches, lakes, snow caps), 3D-noise caves, and deterministic
+  trees that stay seamless across chunk borders. Seedable via `?seed=...`.
+- **Chunk streaming** — 16×64×16 chunks generate around the player (nearest
+  first, budgeted per frame) and unload behind them.
+- **Fast voxel meshing** — per-chunk geometry with hidden-face culling across
+  chunk borders, classic 0–3 vertex ambient occlusion, directional face
+  shading baked into vertex colors, and a separate translucent pass for water.
+- **First-person controller** — WASD, sprint (with FOV kick), jumping,
+  swimming with buoyancy, AABB collision resolved per axis in fixed substeps.
+- **Block interaction** — DDA voxel raycasting; break, place and pick blocks
+  with hold-to-repeat, target outline, and a 9-slot hotbar (keys, wheel,
+  middle-click pick).
+- **Procedural texture atlas** — all 16 block textures plus the isometric
+  hotbar icons are generated with the 2D canvas API.
+- **Pixel HUD** — title and pause screens, hotbar, crosshair, underwater tint
+  and an F3-style debug overlay.
+
+## Getting started
+
+Requires [Bun](https://bun.sh).
+
+```sh
+bun install
+bun run dev
+```
+
+Then open the printed URL and click to play. `bun run build` produces a static
+production bundle in `dist/`.
+
+| Script              | What it does                  |
+| ------------------- | ----------------------------- |
+| `bun run dev`       | Vite dev server with HMR      |
+| `bun run build`     | Type-check + production build |
+| `bun run preview`   | Serve the production build    |
+| `bun run lint`      | ESLint                        |
+| `bun run typecheck` | `tsc --noEmit`                |
+| `bun run format`    | Prettier                      |
+
+## Controls
+
+| Input        | Action          |
+| ------------ | --------------- |
+| W A S D      | Move            |
+| Mouse        | Look            |
+| Space        | Jump / swim up  |
+| Shift        | Sprint          |
+| Left click   | Break block     |
+| Right click  | Place block     |
+| Middle click | Pick block      |
+| 1–9 / wheel  | Select block    |
+| F3           | Debug overlay   |
+| Esc          | Pause           |
+
+## Architecture
+
+```
+src/
+├── game/                  # engine — plain TypeScript, no React
+│   ├── blocks.ts          # block registry (tiles, opacity, solidity)
+│   ├── constants.ts       # all tunables in one place
+│   ├── controls.ts        # keyboard map
+│   ├── physics.ts         # AABB vs. voxel collision
+│   ├── raycast.ts         # Amanatides & Woo voxel DDA
+│   ├── session.ts         # world singleton + frame-rate shared state
+│   ├── textures/          # procedural atlas, materials, hotbar icons
+│   └── world/             # Chunk storage, terrain generator, mesher
+├── state/useGameStore.ts  # zustand store (game status, hotbar, chunk versions)
+└── components/
+    ├── canvas/            # r3f: player, chunk streaming/meshes, interaction
+    └── hud/               # DOM overlay: menus, hotbar, debug, crosshair
+```
+
+Design notes:
+
+- **The world lives outside React.** Voxel data is mutable `Uint8Array`
+  chunks; the zustand store only holds a `chunk key → version` map. Editing a
+  block bumps the affected chunk versions, which re-renders just those
+  `<ChunkMesh>` components and rebuilds their geometry.
+- **Per-frame state stays out of the store.** Player position, FPS and the
+  targeted block are written to a plain shared object each frame; the debug
+  HUD samples it on a timer, so the React tree isn't re-rendered at 60 Hz.
+- **Lighting is baked, not simulated.** Chunk materials are unlit
+  (`MeshBasicMaterial`); per-face directional shade and vertex AO come from
+  the mesher, which is both faster and closer to the classic look.
+- **Generation is order-independent.** Column height, caves and tree sites
+  are pure functions of `(x, z, seed)`, so a chunk can materialize trees whose
+  trunks stand in a neighbouring chunk without ever writing across the border.
+
+## Tech stack
+
+[react-three-fiber](https://github.com/pmndrs/react-three-fiber) ·
+[drei](https://github.com/pmndrs/drei) · [three.js](https://threejs.org) ·
+[zustand](https://github.com/pmndrs/zustand) ·
+[simplex-noise](https://github.com/jwagner/simplex-noise.js) ·
+[Vite](https://vite.dev) · [Bun](https://bun.sh)
+
+## Roadmap ideas
+
+- Web Worker meshing & generation
+- Persistence (IndexedDB) and multiplayer
+- Day/night cycle, block-light propagation
+- Sounds, particles, inventory screen
+
+## License
+
+MIT — see [LICENSE](LICENSE). Not affiliated with Mojang or Microsoft.
