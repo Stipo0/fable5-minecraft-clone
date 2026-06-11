@@ -56,6 +56,7 @@ export function BlockInteraction() {
   useEffect(() => {
     const onMouseDown = (event: MouseEvent) => {
       if (useGameStore.getState().status !== 'playing') return
+      if (screenManager.webview) return // clicks belong to the open website
       if (event.button === 1) event.preventDefault()
       if (event.button === 0) held.current.left = true
       actRef.current(event.button, event.shiftKey)

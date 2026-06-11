@@ -13,7 +13,8 @@ function useGameHotkeys(): void {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
-      if (screenManager.keyboardOwner) return // an in-world screen is typing
+      // an in-world screen is typing, or a real website is open
+      if (screenManager.keyboardOwner || screenManager.webview) return
       if (event.code === 'F3') {
         event.preventDefault() // browsers map F3 to find-in-page
         toggleDebug()
@@ -29,7 +30,7 @@ function useGameHotkeys(): void {
     const onWheel = (event: WheelEvent) => {
       const { status, selectedSlot } = useGameStore.getState()
       if (status !== 'playing') return
-      if (screenManager.aim) return // the wheel scrolls the aimed screen instead
+      if (screenManager.aim || screenManager.webview) return // wheel belongs to the screen
       selectSlot(selectedSlot + Math.sign(event.deltaY))
     }
     window.addEventListener('keydown', onKeyDown)

@@ -110,6 +110,62 @@ body {
   text-shadow: 1px 1px 0 rgba(0, 0, 0, 0.8);
 }
 
+/* ---------- In-world web screens ---------- */
+
+.screen-webview {
+  display: flex;
+  flex-direction: column;
+  background: #fff;
+  overflow: hidden;
+  box-shadow: 0 0 24px rgba(0, 0, 0, 0.45);
+}
+
+.screen-webview-bar {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px;
+  background: #10141c;
+}
+
+.screen-webview-bar form {
+  flex: 1;
+  display: flex;
+}
+
+.screen-webview-bar input {
+  flex: 1;
+  font: 13px / 1.2 ui-monospace, Consolas, monospace;
+  padding: 5px 12px;
+  border-radius: 999px;
+  border: none;
+  outline: none;
+  background: #fff;
+  color: #111;
+}
+
+.screen-webview-bar button {
+  white-space: nowrap;
+  font: 600 12px/1 'Segoe UI', system-ui, sans-serif;
+  background: #2c5d8f;
+  color: #e8f4ff;
+  border: none;
+  border-radius: 6px;
+  padding: 6px 10px;
+  cursor: pointer;
+}
+
+.screen-webview-bar button:hover {
+  background: #3a76b3;
+}
+
+.screen-webview iframe {
+  flex: 1;
+  width: 100%;
+  border: 0;
+  background: #fff;
+}
+
 /* ---------- Hotbar ---------- */
 
 .hotbar-area {

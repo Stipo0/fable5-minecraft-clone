@@ -76,7 +76,7 @@ export function Player() {
       return
     }
 
-    const keys = screenManager.keyboardOwner ? NO_KEYS : getKeys()
+    const keys = screenManager.keyboardOwner || screenManager.webview ? NO_KEYS : getKeys()
     const yaw = camera.rotation.y
     const forwardX = -Math.sin(yaw)
     const forwardZ = -Math.cos(yaw)

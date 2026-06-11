@@ -12,6 +12,7 @@ import {
   UNDERWATER_FOG_NEAR,
 } from '../../game/constants'
 import { controlMap } from '../../game/controls'
+import { screenManager } from '../../game/screens/ScreenManager'
 import { playerSession, spawnPoint } from '../../game/session'
 import { useGameStore } from '../../state/useGameStore'
 import { BlockHighlight } from './BlockHighlight'
@@ -53,8 +54,13 @@ export function GameCanvas() {
           ref={(controls) => {
             playerSession.controls = controls
           }}
-          onLock={() => setStatus('playing')}
+          onLock={() => {
+            screenManager.closeWebview() // clicking the world ends a web session
+            setStatus('playing')
+          }}
           onUnlock={() => {
+            // the pointer is intentionally free while a real website is open
+            if (screenManager.webview) return
             if (useGameStore.getState().status === 'playing') setStatus('paused')
           }}
         />

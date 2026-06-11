@@ -2,6 +2,7 @@ import { createBrowserApp } from './apps/browser'
 import { createHomeApp } from './apps/home'
 import { createPaintApp } from './apps/paint'
 import { createSnakeApp } from './apps/snake'
+import { createWebApp } from './apps/web'
 
 /**
  * A full-screen "application" running on an in-world display. Apps draw with
@@ -31,10 +32,15 @@ export interface LauncherEntry {
 export interface OsHooks {
   requestKeyboard(): void
   releaseKeyboard(): void
+  /** Opens a real, interactive web page (iframe) over this panel. */
+  openWebview(url: string): void
+  closeWebview(): void
+  /** URL of this panel's active webview session, or null. */
+  webviewUrl(): string | null
 }
 
-const MAX_TEXTURE = 1024
-const PX_PER_BLOCK = 128
+const MAX_TEXTURE = 2048
+const PX_PER_BLOCK = 256
 const BOOT_MS = 1300
 
 export const UI_FONT = "'Segoe UI', system-ui, sans-serif"
@@ -73,7 +79,7 @@ export class ScreenOS {
     )
     this.w = wBlocks * px
     this.h = hBlocks * px
-    this.s = Math.max(0.7, Math.min(1.6, Math.min(this.w, this.h) / 320))
+    this.s = Math.max(0.7, Math.min(3.2, Math.min(this.w, this.h) / 320))
     this.canvas = document.createElement('canvas')
     this.canvas.width = this.w
     this.canvas.height = this.h
@@ -83,6 +89,7 @@ export class ScreenOS {
     this.taskH = Math.round(Math.max(18, 22 * this.s))
     this.home = createHomeApp()
     this.apps = [
+      { icon: '🌍', title: 'Web', app: createWebApp() },
       { icon: '🌐', title: 'BlockWiki', app: createBrowserApp() },
       { icon: '🎨', title: 'Paint', app: createPaintApp() },
       { icon: '🐍', title: 'Snake', app: createSnakeApp() },

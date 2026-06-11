@@ -33,6 +33,13 @@ export interface ScreenAim {
   readonly y: number
 }
 
+/** An active real-website session: a live iframe projected onto a panel face. */
+export interface WebviewState {
+  readonly panel: ScreenPanel
+  readonly side: Side
+  readonly url: string
+}
+
 interface PanelSpec {
   axis: Axis
   min: [number, number, number]
@@ -163,6 +170,7 @@ class ScreenManager {
   aim: ScreenAim | null = null
   pointerHeld = false
   keyboardOwner: ScreenPanel | null = null
+  webview: WebviewState | null = null
 
   private readonly blocks = new Map<string, readonly [number, number, number]>()
   private readonly panelByBlock = new Map<string, ScreenPanel>()
@@ -176,6 +184,8 @@ class ScreenManager {
   getPanels = (): ScreenPanel[] => this.panels
 
   isKeyboardCaptured = (): boolean => this.keyboardOwner !== null
+
+  getWebview = (): WebviewState | null => this.webview
 
   private notify(): void {
     for (const listener of this.listeners) listener()
@@ -271,6 +281,30 @@ class ScreenManager {
     this.notify()
   }
 
+  /** Starts a real-website session; the pointer is released for the iframe. */
+  openWebview(os: ScreenOS, url: string): void {
+    const panel = this.panels.find((p) => p.os === os)
+    if (!panel) return
+    const side: Side = this.aim && this.aim.panel === panel ? this.aim.side : 1
+    this.releaseKeyboard()
+    this.webview = { panel, side, url }
+    document.exitPointerLock?.()
+    this.notify()
+  }
+
+  /** Updates the URL of the running session (typed into the DOM address bar). */
+  navigateWebview(url: string): void {
+    if (!this.webview) return
+    this.webview = { ...this.webview, url }
+    this.notify()
+  }
+
+  closeWebview(): void {
+    if (!this.webview) return
+    this.webview = null
+    this.notify()
+  }
+
   private captureKeyboard(os: ScreenOS): void {
     const panel = this.panels.find((p) => p.os === os)
     if (!panel) return
@@ -321,6 +355,7 @@ class ScreenManager {
       panel.texture.dispose()
       if (this.keyboardOwner === panel) this.releaseKeyboard()
       if (this.aim?.panel === panel) this.clearAim()
+      if (this.webview?.panel === panel) this.closeWebview()
     }
     this.panels = next
     this.notify()
@@ -333,13 +368,18 @@ class ScreenManager {
       releaseKeyboard: () => {
         if (this.keyboardOwner?.os === os) this.releaseKeyboard()
       },
+      openWebview: (url) => this.openWebview(os, url),
+      closeWebview: () => {
+        if (this.webview?.panel.os === os) this.closeWebview()
+      },
+      webviewUrl: () => (this.webview?.panel.os === os ? this.webview.url : null),
     })
     const texture = new THREE.CanvasTexture(os.canvas)
     texture.colorSpace = THREE.SRGBColorSpace
-    texture.minFilter = THREE.LinearFilter
+    texture.minFilter = THREE.LinearMipmapLinearFilter
     texture.magFilter = THREE.LinearFilter
-    texture.generateMipmaps = false
-    texture.anisotropy = 4
+    texture.generateMipmaps = true
+    texture.anisotropy = 8
     return {
       id,
       axis: spec.axis,
