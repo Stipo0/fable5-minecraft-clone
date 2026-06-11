@@ -1,4 +1,6 @@
-import { useEffect } from 'react'
+import { useEffect, useSyncExternalStore } from 'react'
+import { HOTBAR_BLOCKS } from '../../game/blocks'
+import { screenManager } from '../../game/screens/ScreenManager'
 import { useGameStore } from '../../state/useGameStore'
 import { Crosshair } from './Crosshair'
 import { DebugOverlay } from './DebugOverlay'
@@ -11,6 +13,7 @@ function useGameHotkeys(): void {
 
   useEffect(() => {
     const onKeyDown = (event: KeyboardEvent) => {
+      if (screenManager.keyboardOwner) return // an in-world screen is typing
       if (event.code === 'F3') {
         event.preventDefault() // browsers map F3 to find-in-page
         toggleDebug()
@@ -19,12 +22,14 @@ function useGameHotkeys(): void {
       if (useGameStore.getState().status !== 'playing') return
       if (event.code.startsWith('Digit')) {
         const digit = Number(event.code.slice(5))
-        if (digit >= 1 && digit <= 9) selectSlot(digit - 1)
+        const slot = digit === 0 ? 9 : digit - 1
+        if (slot < HOTBAR_BLOCKS.length) selectSlot(slot)
       }
     }
     const onWheel = (event: WheelEvent) => {
       const { status, selectedSlot } = useGameStore.getState()
       if (status !== 'playing') return
+      if (screenManager.aim) return // the wheel scrolls the aimed screen instead
       selectSlot(selectedSlot + Math.sign(event.deltaY))
     }
     window.addEventListener('keydown', onKeyDown)
@@ -40,6 +45,10 @@ export function HUD() {
   useGameHotkeys()
   const status = useGameStore((s) => s.status)
   const underwater = useGameStore((s) => s.underwater)
+  const screenTyping = useSyncExternalStore(
+    screenManager.subscribe,
+    screenManager.isKeyboardCaptured,
+  )
 
   return (
     <div className="hud">
@@ -49,6 +58,9 @@ export function HUD() {
         <>
           <Crosshair />
           <Hotbar />
+          {screenTyping && (
+            <div className="screen-typing-hint">⌨ Typing on screen — press ` to leave</div>
+          )}
         </>
       )}
       <DebugOverlay />

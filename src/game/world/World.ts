@@ -24,6 +24,11 @@ export class World {
   readonly chunks = new Map<string, Chunk>()
   /** Called whenever a chunk's contents change and its mesh must be rebuilt. */
   onChunkDirty: ((key: string) => void) | null = null
+  /** Called after every individual block edit (placement, breaking). */
+  onBlockChanged: ((x: number, y: number, z: number, prev: BlockId, next: BlockId) => void) | null =
+    null
+  /** Called when a chunk is dropped from memory. */
+  onChunkUnloaded: ((cx: number, cz: number) => void) | null = null
 
   private readonly terrain: TerrainGenerator
   // One-slot lookup cache; meshing and physics access blocks in tight spatial loops.
@@ -74,6 +79,8 @@ export class World {
   unloadChunk(key: string): void {
     this.chunks.delete(key)
     this.cacheChunk = null
+    const [cx, cz] = parseChunkKey(key)
+    this.onChunkUnloaded?.(cx, cz)
   }
 
   getBlock(x: number, y: number, z: number): BlockId {
@@ -90,7 +97,8 @@ export class World {
     if (!chunk) return
     const lx = x & CHUNK_MASK
     const lz = z & CHUNK_MASK
-    if (chunk.get(lx, y, lz) === id) return
+    const prev = chunk.get(lx, y, lz)
+    if (prev === id) return
     chunk.set(lx, y, lz, id)
     this.markDirty(chunkKey(cx, cz))
     // Border edits affect the neighbour's face culling too.
@@ -98,6 +106,7 @@ export class World {
     if (lx === CHUNK_MASK) this.markDirtyIfLoaded(cx + 1, cz)
     if (lz === 0) this.markDirtyIfLoaded(cx, cz - 1)
     if (lz === CHUNK_MASK) this.markDirtyIfLoaded(cx, cz + 1)
+    this.onBlockChanged?.(x, y, z, prev, id)
   }
 
   /** Collision query; unloaded terrain and the void below are impassable. */

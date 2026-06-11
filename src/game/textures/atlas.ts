@@ -166,6 +166,22 @@ const painters: Record<number, Painter> = {
       }
     }
   },
+  [Tile.Screen]: (ctx, rng) => {
+    // dark casing with an inset glassy panel and a power LED
+    speckle(ctx, rng, ['#23262c', '#1f2227', '#262a31'])
+    ctx.fillStyle = '#15171c'
+    ctx.fillRect(1, 1, TILE_PX - 2, TILE_PX - 2)
+    for (let y = 2; y < TILE_PX - 2; y++) {
+      for (let x = 2; x < TILE_PX - 2; x++) {
+        const glow = 16 + ((rng() * 5) | 0) + (TILE_PX - 2 - y)
+        pixel(ctx, x, y, `rgb(${glow - 8}, ${glow + 4}, ${glow + 12})`)
+      }
+    }
+    pixel(ctx, 3, 3, '#5fd3c4')
+    pixel(ctx, 4, 3, '#3b8f86')
+    pixel(ctx, 3, 4, '#3b8f86')
+    pixel(ctx, TILE_PX - 4, TILE_PX - 4, '#37e08b')
+  },
 }
 
 let atlasCanvas: HTMLCanvasElement | null = null

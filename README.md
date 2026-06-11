@@ -28,10 +28,16 @@ drawn onto a canvas atlas at startup.
 - **Block interaction** — DDA voxel raycasting; break, place and pick blocks
   with hold-to-repeat, target outline, and a 9-slot hotbar (keys, wheel,
   middle-click pick).
-- **Procedural texture atlas** — all 16 block textures plus the isometric
+- **Procedural texture atlas** — all block textures plus the isometric
   hotbar icons are generated with the 2D canvas API.
 - **Pixel HUD** — title and pause screens, hotbar, crosshair, underwater tint
   and an F3-style debug overlay.
+- **Interactive screens** — place Screen blocks in a flat rectangle and they
+  merge into one working display: a canvas-rendered "BlockOS" with a boot
+  splash, clock, taskbar and apps. Point with the crosshair (a cursor appears
+  on the panel), right-click to click, scroll to scroll. Includes **BlockWiki**
+  (a browser that loads real Wikipedia pages — search, articles, images —
+  type with your real keyboard), **Paint** (drag to draw) and **Snake**.
 
 ## Getting started
 
@@ -63,9 +69,11 @@ production bundle in `dist/`.
 | Space        | Jump / swim up  |
 | Shift        | Sprint          |
 | Left click   | Break block     |
-| Right click  | Place block     |
+| Right click  | Place block (or click a screen) |
+| Shift + right click | Place block against a screen |
 | Middle click | Pick block      |
-| 1–9 / wheel  | Select block    |
+| 1–9, 0 / wheel | Select block  |
+| ` (backtick) | Give the keyboard back from a screen |
 | F3           | Debug overlay   |
 | Esc          | Pause           |
 
@@ -79,6 +87,7 @@ src/
 │   ├── controls.ts        # keyboard map
 │   ├── physics.ts         # AABB vs. voxel collision
 │   ├── raycast.ts         # Amanatides & Woo voxel DDA
+│   ├── screens/           # in-world displays: panel detection, BlockOS + apps
 │   ├── session.ts         # world singleton + frame-rate shared state
 │   ├── textures/          # procedural atlas, materials, hotbar icons
 │   └── world/             # Chunk storage, terrain generator, mesher

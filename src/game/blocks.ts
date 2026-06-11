@@ -14,6 +14,7 @@ export const Block = {
   Snow: 12,
   Bedrock: 13,
   Water: 14,
+  Screen: 15,
 } as const
 
 export type BlockId = (typeof Block)[keyof typeof Block]
@@ -36,10 +37,11 @@ export const Tile = {
   Gravel: 13,
   Bedrock: 14,
   Water: 15,
+  Screen: 16,
 } as const
 
 export const ATLAS_COLS = 4
-export const ATLAS_ROWS = 4
+export const ATLAS_ROWS = 5
 
 export interface BlockTiles {
   readonly top: number
@@ -177,6 +179,14 @@ const defs: readonly BlockDef[] = [
     solid: false,
     breakable: false,
   },
+  {
+    id: Block.Screen,
+    name: 'Screen',
+    tiles: uniform(Tile.Screen),
+    opaque: true,
+    solid: true,
+    breakable: true,
+  },
 ]
 
 export function blockDef(id: number): BlockDef {
@@ -194,4 +204,5 @@ export const HOTBAR_BLOCKS: readonly BlockId[] = [
   Block.Glass,
   Block.Bricks,
   Block.Sand,
+  Block.Screen,
 ]

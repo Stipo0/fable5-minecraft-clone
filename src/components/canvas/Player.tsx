@@ -19,8 +19,19 @@ import {
 } from '../../game/constants'
 import { Controls } from '../../game/controls'
 import { moveWithCollisions } from '../../game/physics'
+import { screenManager } from '../../game/screens/ScreenManager'
 import { playerSession, spawnPoint, world } from '../../game/session'
 import { useGameStore } from '../../state/useGameStore'
+
+/** Movement input is suppressed while an in-world screen owns the keyboard. */
+const NO_KEYS: Record<Controls, boolean> = {
+  forward: false,
+  back: false,
+  left: false,
+  right: false,
+  jump: false,
+  sprint: false,
+}
 
 interface Body {
   position: THREE.Vector3
@@ -65,7 +76,7 @@ export function Player() {
       return
     }
 
-    const keys = getKeys()
+    const keys = screenManager.keyboardOwner ? NO_KEYS : getKeys()
     const yaw = camera.rotation.y
     const forwardX = -Math.sin(yaw)
     const forwardZ = -Math.cos(yaw)

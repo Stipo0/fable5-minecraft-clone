@@ -23,7 +23,7 @@ export function Hotbar() {
             onClick={() => selectSlot(index)}
           >
             <img src={getBlockIcon(id)} alt={blockDef(id).name} draggable={false} />
-            <span className="hotbar-slot-key">{index + 1}</span>
+            <span className="hotbar-slot-key">{(index + 1) % 10}</span>
           </button>
         ))}
       </div>

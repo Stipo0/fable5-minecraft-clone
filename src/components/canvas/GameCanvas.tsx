@@ -18,6 +18,7 @@ import { BlockHighlight } from './BlockHighlight'
 import { BlockInteraction } from './BlockInteraction'
 import { ChunkManager } from './ChunkManager'
 import { Player } from './Player'
+import { Screens } from './Screens'
 import { Terrain } from './Terrain'
 
 export function GameCanvas() {
@@ -60,6 +61,7 @@ export function GameCanvas() {
         <Terrain />
         <ChunkManager />
         <BlockInteraction />
+        <Screens />
         <BlockHighlight />
       </Canvas>
     </div>
