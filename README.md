@@ -1,6 +1,6 @@
 # Blockcraft
 
-**▶ Play it in your browser: <https://stipo0.github.io/minecraft-clone/>**
+**▶ Play it in your browser: <https://stipo0.github.io/fable5-minecraft-clone/>**
 
 A Minecraft-style voxel sandbox that runs in the browser, built with **React**,
 **react-three-fiber** and **TypeScript**. Infinite-ish procedurally generated
